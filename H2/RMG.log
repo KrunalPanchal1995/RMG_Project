@@ -1,0 +1,427 @@
+Global RMG Settings:
+   database.directory   = /home/krunal/miniforge3/envs/rmg/share/rmgdatabase (from /home/krunal/miniforge3/envs/rmg/lib/python3.9/site-packages/rmgpy/rmgrc)
+   test_data.directory  = /home/krunal/miniforge3/envs/rmg/lib/python3.9/site-packages/test/rmgpy/test_data (Default, relative to RMG-Py source code)
+RMG execution initiated at Mon Mar  9 15:15:08 2026
+
+#########################################################
+# RMG-Py - Reaction Mechanism Generator in Python       #
+# Version: 3.3.0                                        #
+# Authors: RMG Developers (rmg_dev@mit.edu)             #
+# P.I.s:   William H. Green (whgreen@mit.edu)           #
+#          Richard H. West (r.west@neu.edu)             #
+# Website: http://reactionmechanismgenerator.github.io/ #
+#########################################################
+
+Reading input file "/home/krunal/rmg_projects/H2/input.py"...
+# input.py — RMG input file for H2 oxidation mechanism generation
+
+database(
+    thermoLibraries=['primaryThermoLibrary'],
+    reactionLibraries=[],
+    seedMechanisms=[],
+    kineticsDepositories=['training'],
+    kineticsFamilies='default',
+    kineticsEstimator='rate rules',
+)
+
+# --- Species definitions ---
+species(
+    label='H2',
+    reactive=True,
+    structure=SMILES("[H][H]"),
+)
+
+species(
+    label='O2',
+    reactive=True,
+    structure=SMILES("[O][O]"),
+)
+
+# Inert bath gas (optional but recommended for realistic conditions)
+species(
+    label='N2',
+    reactive=False,
+    structure=SMILES("N#N"),
+)
+
+# --- Reactor conditions ---
+# A constant T/P batch reactor. Choose conditions relevant to your use case.
+simpleReactor(
+    temperature=(1000, 'K'),
+    pressure=(1.0, 'bar'),
+    initialMoleFractions={
+        "H2": 0.05,
+        "O2": 0.21,
+        "N2": 0.74,
+    },
+    terminationTime=(0.02, 's'),
+)
+
+# (Optional) Add additional reactors to broaden the generated mechanism
+# Example: lower temperature condition to encourage inclusion of low-T pathways
+# simpleReactor(
+#     temperature=(800, 'K'),
+#     pressure=(1.0, 'bar'),
+#     initialMoleFractions={
+#         "H2": 0.05,
+#         "O2": 0.21,
+#         "N2": 0.74,
+#     },
+#     terminationTime=(0.05, 's'),
+# )
+
+simulator(
+    atol=1e-16,
+    rtol=1e-8,
+)
+
+# --- Model construction settings ---
+# These tolerances control mechanism growth:
+# smaller toleranceMoveToCore => larger mechanism, more complete chemistry
+model(
+    toleranceMoveToCore=0.1,
+    toleranceKeepInEdge=0.0,
+    toleranceInterruptSimulation=1.0,
+    maximumEdgeSpecies=20000,
+)
+
+options(
+    units='si',
+    generateSeedEachIteration=False,
+    generateOutputHTML=True,
+    saveSimulationProfiles=True,
+    verboseComments=False,
+)
+
+Warning: Generate Output HTML option was turned on. Note that this will slow down model generation.
+
+Loading transport library from OneDMinN2.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/libraries...
+Loading transport library from GRI-Mech.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/libraries...
+Loading transport library from PrimaryTransportLibrary.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/libraries...
+Loading transport library from NOx2018.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/libraries...
+Loading transport library from NIST_Fluorine.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/libraries...
+Loading transport group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/groups...
+Loading frequencies group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/statmech/groups...
+Loading solvation thermodynamics group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/solvation/groups...
+Loading thermodynamics library from primaryThermoLibrary.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/thermo/libraries...
+Loading thermodynamics group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/thermo/groups...
+Adding rate rules from training set in kinetics families...
+Warning: Cphigh is above the theoretical CpInf value for ThermoData object
+ThermoData(Tdata=([300,400,500,600,800,1000,1500],'K'), Cpdata=([60.2599,68.0494,74.7775,80.9311,90.8846,97.4337,105.393],'J/(mol*K)'), H298=(-477.191,'kJ/mol'), S298=(269.551,'J/(mol*K)'), Cp0=(33.2579,'J/(mol*K)'), CpInf=(103.931,'J/(mol*K)'), comment="""Thermo group additivity estimation: group(O2s-(Cds-Cd)(Cds-Cd)) + group(O2s-(Cds-O2d)H) + group(Cds-OdOsOs) + group(Li-OCOdO) + radical(OC=OOJ)""").
+The thermo for this species is probably wrong! Setting CpInf = Cphigh for Entropy calculationat T = 2000.0 K...
+Warning: Cphigh is above the theoretical CpInf value for ThermoData object
+ThermoData(Tdata=([300,400,500,600,800,1000,1500],'K'), Cpdata=([60.2599,68.0494,74.7775,80.9311,90.8846,97.4337,105.393],'J/(mol*K)'), H298=(-477.191,'kJ/mol'), S298=(269.551,'J/(mol*K)'), Cp0=(33.2579,'J/(mol*K)'), CpInf=(103.931,'J/(mol*K)'), comment="""Thermo group additivity estimation: group(O2s-(Cds-Cd)(Cds-Cd)) + group(O2s-(Cds-O2d)H) + group(Cds-OdOsOs) + group(Li-OCOdO) + radical(OC=OOJ)""").
+The thermo for this species is probably wrong! Setting CpInf = Cphigh for Entropy calculationat T = 1666.6666666666665 K...
+Filling in rate rules in kinetics families by averaging...
+NOT generating reactions for unreactive species N2
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    N2
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 1 species and 0 reactions
+    The model edge has 2 species and 0 reactions
+
+
+NOT generating reactions for unreactive species Ar
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ar
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 2 species and 0 reactions
+    The model edge has 2 species and 0 reactions
+
+
+NOT generating reactions for unreactive species He
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    He
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 3 species and 0 reactions
+    The model edge has 2 species and 0 reactions
+
+
+NOT generating reactions for unreactive species Ne
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ne
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 4 species and 0 reactions
+    The model edge has 2 species and 0 reactions
+
+
+Adding species H2(1) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    H2(1)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 5 species and 0 reactions
+    The model edge has 1 species and 0 reactions
+
+
+Adding species O2(2) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O2(2)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 6 species and 0 reactions
+    The model edge has 0 species and 0 reactions
+
+
+Initialization complete. Starting model generation.
+
+Generating initial reactions...
+For reaction generation 1 process is used.
+Generating thermo for new species...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 2 new edge species
+    [H](3)
+    [O]O(4)
+Added 0 new core reactions
+Created 2 new edge reactions
+    [H](3) + [H](3) <=> H2(1)
+    O2(2) + H2(1) <=> [H](3) + [O]O(4)
+
+After model enlargement:
+    The model core has 6 species and 0 reactions
+    The model edge has 2 species and 2 reactions
+
+
+Completed initial enlarge edge step.
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 0 reactions.
+Saving current model core to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:48
+    Memory used: 836.08 MB
+
+Beginning model generation stage 1...
+
+Conducting simulation of reaction system 1...
+At time 0.0000e+00 s, species [H](3) was added to model core to avoid singularity
+
+
+Adding species [H](3) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [H](3)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    [H](3) + [H](3) <=> H2(1)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 7 species and 1 reactions
+    The model edge has 1 species and 1 reactions
+
+
+For reaction generation 1 process is used.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 1 new edge reactions
+    O2(2) + [H](3) <=> [O]O(4)
+
+After model enlargement:
+    The model core has 7 species and 1 reactions
+    The model edge has 1 species and 2 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 1 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 1 reactions.
+Saving current model core to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:49
+    Memory used: 837.26 MB
+
+Conducting simulation of reaction system 1...
+At time 0.0000e+00 s, species [O]O(4) at 85907116.45928712 exceeded the minimum rate for simulation interruption of 1.0
+Reached max number of objects...preparing to terminate
+At time 0.0000e+00 s, species [O]O(4) at rate ratio 85907116.45928712 exceeded the minimum rate for moving to model core of 0.1
+terminating simulation due to interrupt...
+
+
+Adding species [O]O(4) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [O]O(4)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    O2(2) + H2(1) <=> [H](3) + [O]O(4)
+    O2(2) + [H](3) <=> [O]O(4)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 3 reactions
+    The model edge has 0 species and 0 reactions
+
+
+For reaction generation 1 process is used.
+For reaction O2(2) + [O]O(4) <=> [O]OOO(8), Ea raised from 86.9 to 93.3 kJ/mol to match endothermicity of reaction.
+Generating thermo for new species...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 5 new edge species
+    [O](6)
+    [OH](5)
+    OO(7)
+    [O]OOO(8)
+    OOOO(9)
+Added 0 new core reactions
+Created 6 new edge reactions
+    [O](6) + [OH](5) <=> [O]O(4)
+    [H](3) + OO(7) <=> [O]O(4) + H2(1)
+    O2(2) + [O]O(4) <=> [O]OOO(8)
+    [H](3) + [O]O(4) <=> OO(7)
+    [O]O(4) + [O]O(4) <=> O2(2) + OO(7)
+    [O]O(4) + [O]O(4) <=> OOOO(9)
+
+After model enlargement:
+    The model core has 8 species and 3 reactions
+    The model edge has 5 species and 6 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 3 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 3 reactions.
+Saving current model core to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:49
+    Memory used: 837.39 MB
+
+Conducting simulation of reaction system 1...
+Reached max number of objects...preparing to terminate
+At time 2.7591e-03 s, species [O]OOO(8) at rate ratio 0.1461416028885869 exceeded the minimum rate for moving to model core of 0.1
+terminating simulation due to interrupt...
+
+
+Adding species [O]OOO(8) to model core
+Species [O]OOO(8) was Forbidden and not added to Core...Removing from Edge.
+
+Summary of Model Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 3 reactions
+    The model edge has 4 species and 5 reactions
+
+
+For reaction generation 1 process is used.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 3 reactions
+    The model edge has 4 species and 5 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 3 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 3 reactions.
+Saving current model core to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:49
+    Memory used: 837.53 MB
+
+Conducting simulation of reaction system 1...
+At time 2.0000e-02 s, reached target termination time.
+
+
+For reaction generation 1 process is used.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 3 reactions
+    The model edge has 4 species and 5 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 3 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 3 reactions.
+Saving current model core to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:49
+    Memory used: 837.53 MB
+
+Making seed mechanism...
+Performing final model checks...
+No collision rate violators found in the model's core.
+
+MODEL GENERATION COMPLETED
+
+The final model core has 8 species and 3 reactions
+The final model edge has 4 species and 5 reactions
+
+RMG execution terminated at Mon Mar  9 15:15:58 2026

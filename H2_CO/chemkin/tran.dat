@@ -1,0 +1,22 @@
+! Species         Shape    LJ-depth  LJ-diam   DiplMom   Polzblty  RotRelaxNum Data     
+! Name            Index    epsilon/k_B sigma     mu        alpha     Zrot      Source   
+Ar                  0     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+CO2                 1     195.201     3.941     0.000     0.000     0.000    ! PrimaryTransportLibrary
+N2                  1      97.530     3.621     0.000     1.760     4.000    ! PrimaryTransportLibrary
+He                  0     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+Ne                  0     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+CO(1)               1      91.700     3.690     0.000     1.760     4.000    ! PrimaryTransportLibrary
+H2(2)               1      59.700     2.833     0.000     0.000     0.000    ! PrimaryTransportLibrary
+O2(3)               1     106.700     3.467     0.000     0.000     0.000    ! PrimaryTransportLibrary
+[H](4)              0     261.299     4.127     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=339.35 K, Pc=70.14 bar (from Joback method)
+[O]O(7)             2     419.309     4.390     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=544.56 K, Pc=93.53 bar (from Joback method)
+[OH](8)             1     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+[O](9)              0     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+O2(16)              1     223.367     3.461     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=290.09 K, Pc=101.6 bar (from Joback method)
+O(15)               2     809.102     2.641     0.000     1.760     4.000    ! PrimaryTransportLibrary
+OO(11)              2     289.300     4.196     0.000     0.000     0.000    ! PrimaryTransportLibrary
+CHO(6)              2     260.690     4.103     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=338.56 K, Pc=71.21 bar (from Joback method)
+CHO2(14)            2     411.665     4.678     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=534.63 K, Pc=75.88 bar (from Joback method)
+CHO3(10)            2     429.382     4.791     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=557.64 K, Pc=73.68 bar (from Joback method)
+CH2O2(20)           2     411.665     4.678     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=534.63 K, Pc=75.88 bar (from Joback method)
+CHO2(25)            2     411.665     4.678     0.000     0.000     0.000    ! Epsilon & sigma estimated with Tc=534.63 K, Pc=75.88 bar (from Joback method)

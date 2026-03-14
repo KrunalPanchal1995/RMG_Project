@@ -1,0 +1,793 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>RMG Output</title>
+<style type="text/css">
+    body {
+        font-family: sans-serif;
+    }
+    a {
+        color: #993333;
+        text-decoration: none;
+    }
+    a:visited {
+        color: #993333;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+
+    
+    table.speciesList, table.reactionList {
+        border-collapse: collapse;
+        align: center;
+    }
+
+        
+    table.speciesList th, table.reactionList th {
+        text-align: left;
+        vertical-align: top;
+    }
+    table.reaction {
+        border-top: 1px solid #808080;        
+        padding: 10px;
+    }
+    td.reactants {
+        text-align: right;
+    }
+    td.products {
+        text-align: left;
+    }
+    td.reactionArrow {
+        text-align: center;
+        font-size: 16px;
+    }
+    td.species img, td.reactants img, td.products img {
+        vertical-align: middle;
+    }
+    
+    img.surface_species {
+        vertical-align: bottom;
+    }
+    
+    tr.species{
+        border-top: 1px solid #808080;        
+    }
+
+    tr.rxnStart{
+        border-top: 1px solid #808080;        
+    }
+    
+    td, .speciesList th{
+        padding: 10px;
+        }
+    
+    td.index {
+    width: 50px;
+    }
+    
+    .thermo td, .thermo th{
+    padding: 2px;
+    }
+    
+    .kinetics td,  .kinetics th {
+    padding: 2px;
+    }
+    
+    tr.kinetics {
+        font-size: small;
+    }
+    .KineticsData {
+        # border: 1px solid gray;
+    }
+    .KineticsData th {
+        width: 15em;
+        word-wrap: none;
+    }
+    .KineticsData td {
+        width: 3em;
+    }
+    
+    .chemkin, .KineticsData_repr {
+       white-space: pre-wrap;
+       font-size: x-small;
+       font-family: "Andale Mono", monospace;
+    }
+    
+    .energy {
+        font-size: small;
+    }
+    
+    .thermoComment {
+       white-space: pre-wrap;
+       font-size: small;
+       font-family: "Andale Mono", monospace;
+    }
+    .hide_kinetics .kinetics{
+       display: none !important;
+    }
+    .hide_chemkin .chemkin{
+       display: none !important;
+    }
+    .hide_reaction{
+       display: none !important;
+    }
+    .hide_energy .energy{
+       display: none !important;
+    }
+    .hide_thermoComment .thermoComment{
+       display: none !important;
+    }
+
+           
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="../../../external/jquery.min.js"></script>
+<script type="text/javascript">
+function updateFamily(family) {
+    if (family.checked) {
+        $("."+family.value).show();
+    } else {
+        $("."+family.value).hide();
+    }
+}
+function updateDetails(type) {
+    if (type.checked) {
+        $("."+type.value).show();
+    } else {
+        $("."+type.value).hide();
+    }
+}
+function checkAllFamilies() {
+    $("#familySelector").find("[name='family']").each(function() { this.checked = true; updateFamily(this); });
+    return false;
+}
+function uncheckAllFamilies() {
+    $("#familySelector").find("[name='family']").each(function() { this.checked = false; updateFamily(this); });
+    return false;
+}
+function checkAllDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { this.checked = true; updateDetails(this); });
+    return false;
+}
+function uncheckAllDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { this.checked = false; updateDetails(this); });
+    return false;
+}
+
+function updateFamilyDetails() {
+    $("#familySelector").find("[name='family']").each(function() { 
+        updateDetails(this); });
+    return false;
+}
+function updateReactionDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { 
+        updateDetails(this); });
+    return false;
+}
+
+function updateThermoDetails(type) {
+    if (type.checked) {
+        $(".thermoComment").removeClass("hide_"+type.value);
+    } else {
+        $(".thermoComment").addClass("hide_"+type.value);
+    }
+}
+
+function uncheckThermoDetails() {
+    $("#thermoSelector").find("[name='detail']").each(function() { this.checked = false; updateThermoDetails(this); });
+    return false;
+}
+
+function resetReactionFilter() {
+    $.each($(".reaction"), function() {
+        $(this).removeClass("hide_reaction");
+    });
+}
+
+function submitReactionFilter(){
+    resetReactionFilter();
+    _r1 = $("#reactant1").val().toLowerCase();
+    _r2 = $("#reactant2").val().toLowerCase();
+    _p1 = $("#product1").val().toLowerCase();
+    _p2 = $("#product2").val().toLowerCase();
+    $.each($(".reaction"), function() {
+        _rxnRow = this;
+        _matched = false;
+        _rxn_spc_list = [""];
+        _reactants = _rxnRow.getElementsByClassName('reactants');
+        $.each($(_reactants).find("a"), function() {
+            _a = this;
+            $.each($(_a).find("img"), function() {
+                _spec = this;
+                _rxn_spc_list.push(_spec.getAttribute("alt").toLowerCase());
+          
+            });
+        });
+        _products = _rxnRow.getElementsByClassName('products');
+        $.each($(_products).find("a"), function() {
+            _a = this;
+            $.each($(_a).find("img"), function() {
+                _spec = this;
+                _rxn_spc_list.push(_spec.getAttribute("alt").toLowerCase());
+            
+            });
+        });
+
+        if(_rxn_spc_list.indexOf(_r1) != -1 && _rxn_spc_list.indexOf(_r2) != -1 &&_rxn_spc_list.indexOf(_p1) != -1 && _rxn_spc_list.indexOf(_p2) != -1){
+            _matched = true
+        }
+        if(_matched == true)
+        $(_rxnRow).removeClass("hide_reaction");
+        else
+        $(_rxnRow).addClass("hide_reaction");
+
+     });
+}
+
+$(document).ready(function() {
+    uncheckThermoDetails();
+    checkAllFamilies();
+    uncheckAllDetails();
+});
+</script>
+</head>
+
+<body>
+
+<h1>RMG Output</h1>
+
+<h2>Species (8)</h2>
+
+<form id='thermoSelector' action="">
+<input type="checkbox" id="thermoComment" name="detail" value="thermoComment" onclick="updateThermoDetails(this);" checked="false"><label for="thermoComment"><b>Show Thermo Details</b></label><br>
+</form>
+
+
+<table class="speciesList" hide_thermoComment>
+<tr><th>Index</th><th>Thermo<br> H298 (kcal/mol), S298 (cal/mol*K), Cp (cal/mol*K)</th><th>Structure</th><th>Label</th><th>SMILES</th><th>MW<br> (g/mol)</th></tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                45.79
+                </td>
+                <td>6.96</td>
+                <td>7.07</td>
+                <td>7.81</td>
+                <td>8.31</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/1%20N%20u0%20p1%20c0%20%7B2%2CT%7D%0A2%20N%20u0%20p1%20c0%20%7B1%2CT%7D%0A><img src="species/N2.png" alt="N2" title="N2"></a></td>
+    <td class="label" valign="top">N2</td>
+    <td class="SMILES" valign="top">N#N</td>
+    
+  <td class="MW" valign="top">28.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                37.01
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/1%20Ar%20u0%20p4%20c0%0A><img src="species/Ar.png" alt="Ar" title="Ar"></a></td>
+    <td class="label" valign="top">Ar</td>
+    <td class="SMILES" valign="top">[Ar]</td>
+    
+  <td class="MW" valign="top">39.88</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                30.15
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/1%20He%20u0%20p1%20c0%0A><img src="species/He.png" alt="He" title="He"></a></td>
+    <td class="label" valign="top">He</td>
+    <td class="SMILES" valign="top">[He]</td>
+    
+  <td class="MW" valign="top">4.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                34.97
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/1%20Ne%20u0%20p4%20c0%0A><img src="species/Ne.png" alt="Ne" title="Ne"></a></td>
+    <td class="label" valign="top">Ne</td>
+    <td class="SMILES" valign="top">[Ne]</td>
+    
+  <td class="MW" valign="top">20.18</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                31.23
+                </td>
+                <td>6.92</td>
+                <td>6.97</td>
+                <td>7.22</td>
+                <td>7.72</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/H2(1).png" alt="H2(1)" title="H2(1)"></a></td>
+    <td class="label" valign="top">H2(1)</td>
+    <td class="SMILES" valign="top">[H][H]</td>
+    
+  <td class="MW" valign="top">2.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    2.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                49.02
+                </td>
+                <td>7.02</td>
+                <td>7.43</td>
+                <td>8.35</td>
+                <td>8.73</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/multiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A><img src="species/O2(2).png" alt="O2(2)" title="O2(2)"></a></td>
+    <td class="label" valign="top">O2(2)</td>
+    <td class="SMILES" valign="top">[O][O]</td>
+    
+  <td class="MW" valign="top">32.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    3.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                52.10
+                 </td>
+                <td>
+                27.42
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A><img src="species/[H](3).png" alt="[H](3)" title="[H](3)"></a></td>
+    <td class="label" valign="top">[H](3)</td>
+    <td class="SMILES" valign="top">[H]</td>
+    
+  <td class="MW" valign="top">1.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    4.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                0.43
+                 </td>
+                <td>
+                54.74
+                </td>
+                <td>8.37</td>
+                <td>9.35</td>
+                <td>11.56</td>
+                <td>12.95</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo group additivity estimation: group(O2s-OsH) + group(O2s-OsH) +<br>radical(HOOJ)</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/[O]O(4).png" alt="[O]O(4)" title="[O]O(4)"></a></td>
+    <td class="label" valign="top">[O]O(4)</td>
+    <td class="SMILES" valign="top">[O]O</td>
+    
+  <td class="MW" valign="top">33.01</td>
+    
+</tr>
+
+</table>
+
+<h2>Reactions (3)</h2>
+
+<form id='familySelector' action="">
+<h4>Reaction families:</h4>
+    <input type="checkbox" id="H_Abstraction" name="family" value="H_Abstraction" checked="checked" onclick="updateFamily(this);"><label for="H_Abstraction">H_Abstraction (1 rxn)</label><br>
+    <input type="checkbox" id="R_Recombination" name="family" value="R_Recombination" checked="checked" onclick="updateFamily(this);"><label for="R_Recombination">R_Recombination (2 rxns)</label><br>
+
+<a href="javascript:checkAllFamilies();" onclick="checkAllFamilies()">check all</a> &nbsp; &nbsp; <a href="javascript:uncheckAllFamilies();" onclick="uncheckAllFamilies();">uncheck all</a><br>
+
+<h4>Reaction Details:</h4>
+<input type="checkbox" id="kinetics" name="detail" value="kinetics" onclick="updateDetails(this);"><label for="kinetics">Kinetics</label><br>
+<input type="checkbox" id="energy" name="detail" value="energy" onclick="updateDetails(this);"><label for="energy">Heats of Reaction</label><br>
+<input type="checkbox" id="chemkin" name="detail" value="chemkin" onclick="updateDetails(this);"><label for="chemkin">Chemkin strings</label><br>
+<a href="javascript:checkAllDetails();" onclick="checkAllDetails()">check all</a> &nbsp; &nbsp; <a href="javascript:uncheckAllDetails();" onclick="uncheckAllDetails();">uncheck all</a>
+</form>
+
+<h4>Reaction Filter:</h4>
+
+<form id="reactionFilter">
+  Reactant 1: <input type="text" id="reactant1" value=""> &nbsp;
+  Reactant 2: <input type="text" id="reactant2" value=""> &nbsp;
+  Product 1: <input type="text" id="product1" value=""> &nbsp;
+  Product 2: <input type="text" id="product2" value=""><br><br>
+
+  
+</form>
+
+<input type="button" onclick="submitReactionFilter()" value="Search"> &nbsp;
+<input type="button" onclick="resetReactionFilter()" value="Clear Filter"> 
+
+<h4>Reaction List:</h4>
+
+<table class="reactionList">
+<thead>
+<tr><th>Index</th><th colspan="3" style="text-align: center;">Reaction</th><th>Family</th></tr>
+</thead>
+
+<tbody class="reaction">
+<tr class="R_Recombination rxnStart">
+    <td class="index"><a href="https://rmg.mit.edu/database/kinetics/reaction/reactant1%3Dmultiplicity%202%0A1%20H%20u1%20p0%20c0%0A__reactant2%3Dmultiplicity%202%0A1%20H%20u1%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">1.</a></td>
+    <td class="reactants"><a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A"><img src="species/[H](3).png" alt="[H](3)" title="[H](3), MW = 1.01 g/mol" ></a> + <a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A"><img src="species/[H](3).png" alt="[H](3)" title="[H](3), MW = 1.01 g/mol" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="https://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2(1).png" alt="H2(1)" title="H2(1), MW = 2.02 g/mol" ></a></td>
+    <td class="family">R_Recombination</td>
+</tr>
+<tr class="kinetics R_Recombination hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+4.1</td><td>+4.4</td><td>+4.5</td><td>+4.6</td>
+</tr></table><span class='KineticsData_repr'>Arrhenius(A=(5.45e+10,'cm^3/(mol*s)'), n=0, Ea=(6.276,'kJ/mol'), T0=(1,'K'), Tmin=(278,'K'), Tmax=(372,'K'), comment="""Matched reaction 56 H + H <=> H2 in R_Recombination/training
+This reaction matched rate rule [Root_1R->H_N-2R->S_2CHNO->H]
+family: R_Recombination""")</span></td>
+</tr>
+<tr class="energy R_Recombination hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -104.21
+    <br><b>S298 (cal/mol*K)</b> = -23.60
+    <br><b>G298 (kcal/mol)</b> = -97.17</td>
+    <td></td>
+</tr>
+<tr class="chemkin R_Recombination hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: R_Recombination
+! Flux pairs: [H](3), H2(1); [H](3), H2(1); 
+! Matched reaction 56 H + H <=> H2 in R_Recombination/training
+! This reaction matched rate rule [Root_1R->H_N-2R->S_2CHNO->H]
+! family: R_Recombination
+[H](3)+[H](3)<=>H2(1)                               5.450000e+10 0.000     1.500    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="H_Abstraction rxnStart">
+    <td class="index"><a href="https://rmg.mit.edu/database/kinetics/reaction/reactant1%3Dmultiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product1%3Dmultiplicity%202%0A1%20H%20u1%20p0%20c0%0A__product2%3Dmultiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">2.</a></td>
+    <td class="reactants"><a href="https://rmg.mit.edu/database/molecule/multiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A"><img src="species/O2(2).png" alt="O2(2)" title="O2(2), MW = 32.00 g/mol" ></a> + <a href="https://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2(1).png" alt="H2(1)" title="H2(1), MW = 2.02 g/mol" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A"><img src="species/[H](3).png" alt="[H](3)" title="[H](3), MW = 1.01 g/mol" ></a> + <a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/[O]O(4).png" alt="[O]O(4)" title="[O]O(4), MW = 33.01 g/mol" ></a></td>
+    <td class="family">H_Abstraction</td>
+</tr>
+<tr class="kinetics H_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>-16.3</td><td>-3.9</td><td>+0.2</td><td>+2.3</td>
+</tr></table><span class='KineticsData_repr'>Arrhenius(A=(2.9e+14,'cm^3/(mol*s)','*|/',5), n=0, Ea=(236.982,'kJ/mol'), T0=(1,'K'), Tmin=(300,'K'), Tmax=(800,'K'), comment="""Matched reaction 305 H2 + O2 <=> HO2_r12 + H in H_Abstraction/training
+This reaction matched rate rule [H2;O2b]
+family: H_Abstraction""")</span></td>
+</tr>
+<tr class="energy H_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 52.53
+    <br><b>S298 (cal/mol*K)</b> = 1.90
+    <br><b>G298 (kcal/mol)</b> = 51.96</td>
+    <td></td>
+</tr>
+<tr class="chemkin H_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: H_Abstraction
+! Flux pairs: O2(2), [O]O(4); H2(1), [H](3); 
+! Matched reaction 305 H2 + O2 <=> HO2_r12 + H in H_Abstraction/training
+! This reaction matched rate rule [H2;O2b]
+! family: H_Abstraction
+O2(2)+H2(1)<=>[H](3)+[O]O(4)                        2.900000e+14 0.000     56.640   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="R_Recombination rxnStart">
+    <td class="index"><a href="https://rmg.mit.edu/database/kinetics/reaction/reactant1%3Dmultiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A__reactant2%3Dmultiplicity%202%0A1%20H%20u1%20p0%20c0%0A__product1%3Dmultiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">3.</a></td>
+    <td class="reactants"><a href="https://rmg.mit.edu/database/molecule/multiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A"><img src="species/O2(2).png" alt="O2(2)" title="O2(2), MW = 32.00 g/mol" ></a> + <a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A"><img src="species/[H](3).png" alt="[H](3)" title="[H](3), MW = 1.01 g/mol" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="https://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/[O]O(4).png" alt="[O]O(4)" title="[O]O(4), MW = 33.01 g/mol" ></a></td>
+    <td class="family">R_Recombination</td>
+</tr>
+<tr class="kinetics R_Recombination hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+7.4</td><td>+7.8</td><td>+8.1</td><td>+8.2</td>
+</tr></table><span class='KineticsData_repr'>Arrhenius(A=(8.79e+10,'cm^3/(mol*s)'), n=1, Ea=(1.8828,'kJ/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(6000,'K'), comment="""Matched reaction 104 O2 + H <=> HO2-2 in R_Recombination/training
+This reaction matched rate rule [Root_1R->H_N-2R->S_N-2CHNO->H_N-2CNO-inRing_Ext-2CNO-R_N-Sp-3R!H=2CCNNOO_2CNO->O_3R!H->O]
+family: R_Recombination""")</span></td>
+</tr>
+<tr class="energy R_Recombination hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -51.67
+    <br><b>S298 (cal/mol*K)</b> = -21.70
+    <br><b>G298 (kcal/mol)</b> = -45.21</td>
+    <td></td>
+</tr>
+<tr class="chemkin R_Recombination hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: R_Recombination
+! Flux pairs: [H](3), [O]O(4); O2(2), [O]O(4); 
+! Matched reaction 104 O2 + H <=> HO2-2 in R_Recombination/training
+! This reaction matched rate rule [Root_1R->H_N-2R->S_N-2CHNO->H_N-2CNO-inRing_Ext-2CNO-R_N-Sp-3R!H=2CCNNOO_2CNO->O_3R!H->O]
+! family: R_Recombination
+O2(2)+[H](3)<=>[O]O(4)                              8.790000e+10 1.000     0.450    
+</td>
+</tr>
+</tbody>
+
+
+</table>
+
+</body>
+
+</html>

@@ -1,0 +1,944 @@
+Global RMG Settings:
+   database.directory   = /home/krunal/miniforge3/envs/rmg/share/rmgdatabase (from /home/krunal/miniforge3/envs/rmg/lib/python3.9/site-packages/rmgpy/rmgrc)
+   test_data.directory  = /home/krunal/miniforge3/envs/rmg/lib/python3.9/site-packages/test/rmgpy/test_data (Default, relative to RMG-Py source code)
+RMG execution initiated at Sat Mar 14 15:55:13 2026
+
+#########################################################
+# RMG-Py - Reaction Mechanism Generator in Python       #
+# Version: 3.3.0                                        #
+# Authors: RMG Developers (rmg_dev@mit.edu)             #
+# P.I.s:   William H. Green (whgreen@mit.edu)           #
+#          Richard H. West (r.west@neu.edu)             #
+# Website: http://reactionmechanismgenerator.github.io/ #
+#########################################################
+
+Reading input file "/home/krunal/rmg_projects/H2_CO/input.py"...
+#!/usr/bin/env python
+# Auto-generated RMG input.py from: F:\mechanism-optimization-suite\DATASET_MANIPULATION\SPARSE_DATASET_GENERATION\targets.csv
+# CSV headers used:
+#   rep_id, sr_no, dataset_ID, Temperature_K, Pressure_Pa, Phi, Fuel_list, Fuel_total, Bathgas_list, Bathgas_total, target_type, observed, obs_unit, X_Ar, X_CH4, X_CO, X_CO2, X_H2, X_N2, X_O2, log10_H2_CO
+
+database(
+    thermoLibraries=['primaryThermoLibrary'],
+    reactionLibraries=[],
+    seedMechanisms=[],
+    kineticsDepositories=['training'],
+    kineticsFamilies='default',
+    kineticsEstimator='rate rules',
+    transportLibraries=['primaryTransportLibrary'],
+)
+
+# Species used across reduced reactor set: Ar, CO, CO2, H2, N2, O2
+
+species(
+    label='Ar',
+    reactive=False,
+    structure=SMILES('[Ar]'),
+)
+
+species(
+    label='CO',
+    reactive=True,
+    structure=SMILES('[C-]#[O+]'),
+)
+
+species(
+    label='CO2',
+    reactive=False,
+    structure=SMILES('O=C=O'),
+)
+
+species(
+    label='H2',
+    reactive=True,
+    structure=SMILES('[H][H]'),
+)
+
+species(
+    label='N2',
+    reactive=False,
+    structure=SMILES('N#N'),
+)
+
+species(
+    label='O2',
+    reactive=True,
+    structure=SMILES('[O][O]'),
+)
+
+generatedSpeciesConstraints(
+    allowed=['input species', 'seed mechanisms', 'reaction libraries'],
+    maximumCarbonAtoms=2,
+    maximumOxygenAtoms=4,
+    maximumNitrogenAtoms=2,
+    maximumSiliconAtoms=0,
+    maximumSulfurAtoms=0,
+    maximumHeavyAtoms=10,
+    maximumRadicalElectrons=2,
+)
+
+model(
+    toleranceMoveToCore=0.1,
+    toleranceKeepInEdge=0.0,
+    toleranceInterruptSimulation=1e8,
+    maximumEdgeSpecies=100000,
+)
+
+simulator(
+    atol=1e-16,
+    rtol=1e-8,
+)
+
+options(
+    units='si',
+    saveRestartPeriod=None,
+    generateOutputHTML=False,
+    generatePlots=False,
+    saveEdgeSpecies=True,
+    saveSimulationProfiles=False,
+)
+
+# Reactor set generated from reduced targets (KMeans in T,P,Phi,log10(H2/CO))
+reactor_conditions = [
+    {
+        'T': 1944,
+        'P': 112000,
+        'mf': {'H2': 0.0017, 'CO': 0.033, 'O2': 0.0347, 'Ar': 0.9306},
+        'comment': 'rep_id=1; dataset_ID=x10001029; target_type=Tig; Phi=0.5; log10(H2/CO)=-1.2880650182573068',
+    },
+    {
+        'T': 1124,
+        'P': 1.642e+06,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=2; dataset_ID=x10001030; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 2050,
+        'P': 124630,
+        'mf': {'H2': 0.00049, 'CO': 0.0328, 'O2': 0.0101, 'Ar': 0.95661},
+        'comment': 'rep_id=3; dataset_ID=x10001050; target_type=Tig; Phi=1.6480198019801982; log10(H2/CO)=-1.8256777628100909',
+    },
+    {
+        'T': 2250,
+        'P': 142868,
+        'mf': {'H2': 0.00049, 'CO': 0.0328, 'O2': 0.0101, 'Ar': 0.95661},
+        'comment': 'rep_id=4; dataset_ID=x10001050; target_type=Tig; Phi=1.6480198019801982; log10(H2/CO)=-1.8256777628100909',
+    },
+    {
+        'T': 2675,
+        'P': 182385,
+        'mf': {'H2': 0.00049, 'CO': 0.0328, 'O2': 0.0101, 'Ar': 0.95661},
+        'comment': 'rep_id=5; dataset_ID=x10001050; target_type=Tig; Phi=1.6480198019801982; log10(H2/CO)=-1.8256777628100909',
+    },
+    {
+        'T': 1151,
+        'P': 2.02751e+06,
+        'mf': {'H2': 0.015559844, 'CO': 0.015559844, 'O2': 0.015559844, 'Ar': 0.9399906, 'CO2': 0.013329867},
+        'comment': 'rep_id=6; dataset_ID=x10001082; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 950,
+        'P': 104000,
+        'mf': {'H2': 0.01739826, 'CO': 0.01739826, 'O2': 0.03469653, 'Ar': 0.93050695},
+        'comment': 'rep_id=7; dataset_ID=x10001026; target_type=Tig; Phi=0.5014409221902016; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1527,
+        'P': 91000,
+        'mf': {'H2': 0.01739826, 'CO': 0.01739826, 'O2': 0.03469653, 'Ar': 0.93050695},
+        'comment': 'rep_id=8; dataset_ID=x10001026; target_type=Tig; Phi=0.5014409221902016; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 2202,
+        'P': 92000,
+        'mf': {'H2': 0.01739826, 'CO': 0.01739826, 'O2': 0.03469653, 'Ar': 0.93050695},
+        'comment': 'rep_id=9; dataset_ID=x10001026; target_type=Tig; Phi=0.5014409221902016; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1024,
+        'P': 111458,
+        'mf': {'H2': 0.035, 'CO': 0.14, 'O2': 0.174, 'N2': 0.651},
+        'comment': 'rep_id=10; dataset_ID=x10001036; target_type=Tig; Phi=0.5028735632183909; log10(H2/CO)=-0.6020599913186562',
+    },
+    {
+        'T': 1333,
+        'P': 1.22603e+06,
+        'mf': {'H2': 0.004, 'CO': 0.006, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=11; dataset_ID=x10001066; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.17609125901949',
+    },
+    {
+        'T': 1137,
+        'P': 1.2767e+06,
+        'mf': {'H2': 0.004, 'CO': 0.006, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=12; dataset_ID=x10001066; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.17609125901949',
+    },
+    {
+        'T': 1114,
+        'P': 212782,
+        'mf': {'H2': 0.008991009, 'CO': 0.16483516, 'O2': 0.17482517, 'N2': 0.65134865},
+        'comment': 'rep_id=13; dataset_ID=x10001043; target_type=Tig; Phi=0.4971428571428572; log10(H2/CO)=-1.2632414347289587',
+    },
+    {
+        'T': 1230,
+        'P': 192518,
+        'mf': {'H2': 0.008991009, 'CO': 0.16483516, 'O2': 0.17482517, 'N2': 0.65134865},
+        'comment': 'rep_id=14; dataset_ID=x10001043; target_type=Tig; Phi=0.4971428571428572; log10(H2/CO)=-1.2632414347289587',
+    },
+    {
+        'T': 1516,
+        'P': 377000,
+        'mf': {'H2': 0.0017, 'CO': 0.033, 'O2': 0.0347, 'Ar': 0.9306},
+        'comment': 'rep_id=15; dataset_ID=x10001028; target_type=Tig; Phi=0.5; log10(H2/CO)=-1.2880650182573068',
+    },
+    {
+        'T': 1055,
+        'P': 1.00616e+06,
+        'mf': {'H2': 0.0132, 'CO': 0.0268, 'O2': 0.02, 'Ar': 0.94},
+        'comment': 'rep_id=16; dataset_ID=x10001078; target_type=Tig; Phi=1.0; log10(H2/CO)=-0.30756086280624284',
+    },
+    {
+        'T': 1056,
+        'P': 987919,
+        'mf': {'H2': 0.015559844, 'CO': 0.015559844, 'O2': 0.015559844, 'Ar': 0.9399906, 'CO2': 0.013329867},
+        'comment': 'rep_id=17; dataset_ID=x10001081; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1206,
+        'P': 984879,
+        'mf': {'H2': 0.015559844, 'CO': 0.015559844, 'O2': 0.015559844, 'Ar': 0.9399906, 'CO2': 0.013329867},
+        'comment': 'rep_id=18; dataset_ID=x10001081; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1258,
+        'P': 3.13094e+06,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=19; dataset_ID=x10001073; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 1139,
+        'P': 2.01333e+06,
+        'mf': {'H2': 0.0054500545, 'CO': 0.015370154, 'O2': 0.010410104, 'N2': 0.028760288, 'Ar': 0.9400094},
+        'comment': 'rep_id=20; dataset_ID=x10001085; target_type=Tig; Phi=0.9999999999999998; log10(H2/CO)=-0.4502773651716716',
+    },
+    {
+        'T': 1117,
+        'P': 1.421e+06,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=21; dataset_ID=x10001021_x; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1359,
+        'P': 1.585e+06,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=22; dataset_ID=x10001021_x; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1084,
+        'P': 1.613e+06,
+        'mf': {'H2': 0.0017, 'CO': 0.033, 'O2': 0.0347, 'Ar': 0.9306},
+        'comment': 'rep_id=23; dataset_ID=x10001027_x; target_type=Tig; Phi=0.5; log10(H2/CO)=-1.2880650182573068',
+    },
+    {
+        'T': 1385,
+        'P': 1.628e+06,
+        'mf': {'H2': 0.0017, 'CO': 0.033, 'O2': 0.0347, 'Ar': 0.9306},
+        'comment': 'rep_id=24; dataset_ID=x10001027_x; target_type=Tig; Phi=0.5; log10(H2/CO)=-1.2880650182573068',
+    },
+    {
+        'T': 1028,
+        'P': 92000,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=25; dataset_ID=x10001023; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1214,
+        'P': 100000,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=26; dataset_ID=x10001023; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 2161,
+        'P': 113000,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=27; dataset_ID=x10001023; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1456,
+        'P': 344000,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=28; dataset_ID=x10001022; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1649,
+        'P': 413000,
+        'mf': {'H2': 0.003, 'CO': 0.0562, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=29; dataset_ID=x10001022; target_type=Tig; Phi=1.0; log10(H2/CO)=-1.2726150607123614',
+    },
+    {
+        'T': 1127,
+        'P': 2.0417e+06,
+        'mf': {'H2': 0.028, 'CO': 0.012, 'O2': 0.02, 'Ar': 0.94},
+        'comment': 'rep_id=30; dataset_ID=x10001076; target_type=Tig; Phi=1.0; log10(H2/CO)=0.36797678527391364',
+    },
+    {
+        'T': 1241,
+        'P': 3.1816e+06,
+        'mf': {'H2': 0.008, 'CO': 0.002, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=31; dataset_ID=x10001061; target_type=Tig; Phi=0.5; log10(H2/CO)=0.602059991165102',
+    },
+    {
+        'T': 1055,
+        'P': 1.577e+06,
+        'mf': {'H2': 0.0177, 'CO': 0.018, 'O2': 0.03559, 'Ar': 0.92871},
+        'comment': 'rep_id=32; dataset_ID=x10001057; target_type=Tig; Phi=0.5015453779151446; log10(H2/CO)=-0.007299238741090476',
+    },
+    {
+        'T': 1172,
+        'P': 977786,
+        'mf': {'H2': 0.0054500545, 'CO': 0.015370154, 'O2': 0.010410104, 'N2': 0.028760288, 'Ar': 0.9400094},
+        'comment': 'rep_id=33; dataset_ID=x10001084; target_type=Tig; Phi=0.9999999999999998; log10(H2/CO)=-0.4502773651716716',
+    },
+    {
+        'T': 1207,
+        'P': 1.642e+06,
+        'mf': {'H2': 0.00088, 'CO': 0.01654, 'O2': 0.0174, 'Ar': 0.96518},
+        'comment': 'rep_id=34; dataset_ID=x10001055; target_type=Tig; Phi=0.5005747126436781; log10(H2/CO)=-1.2740528325990998',
+    },
+    {
+        'T': 1010,
+        'P': 121590,
+        'mf': {'H2': 0.008991009, 'CO': 0.16483516, 'O2': 0.17482517, 'N2': 0.65134865},
+        'comment': 'rep_id=35; dataset_ID=x10001042; target_type=Tig; Phi=0.4971428571428572; log10(H2/CO)=-1.2632414347289587',
+    },
+    {
+        'T': 961,
+        'P': 183398,
+        'mf': {'H2': 0.0054500545, 'CO': 0.015370154, 'O2': 0.010410104, 'N2': 0.028760288, 'Ar': 0.9400094},
+        'comment': 'rep_id=36; dataset_ID=x10001083; target_type=Tig; Phi=0.9999999999999998; log10(H2/CO)=-0.4502773651716716',
+    },
+    {
+        'T': 1117,
+        'P': 200624,
+        'mf': {'H2': 0.0054500545, 'CO': 0.015370154, 'O2': 0.010410104, 'N2': 0.028760288, 'Ar': 0.9400094},
+        'comment': 'rep_id=37; dataset_ID=x10001083; target_type=Tig; Phi=0.9999999999999998; log10(H2/CO)=-0.4502773651716716',
+    },
+    {
+        'T': 1182,
+        'P': 1.81372e+06,
+        'mf': {'H2': 0.035, 'CO': 0.14, 'O2': 0.174, 'N2': 0.651},
+        'comment': 'rep_id=38; dataset_ID=x10001038; target_type=Tig; Phi=0.5028735632183909; log10(H2/CO)=-0.6020599913186562',
+    },
+    {
+        'T': 1121,
+        'P': 1.41855e+06,
+        'mf': {'H2': 0.008991009, 'CO': 0.16483516, 'O2': 0.17482517, 'N2': 0.65134865},
+        'comment': 'rep_id=39; dataset_ID=x10001044; target_type=Tig; Phi=0.4971428571428572; log10(H2/CO)=-1.2632414347289587',
+    },
+    {
+        'T': 1730,
+        'P': 142868,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=40; dataset_ID=x10001071; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 1434,
+        'P': 161107,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=41; dataset_ID=x10001071; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 1154,
+        'P': 178332,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=42; dataset_ID=x10001071; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 1026,
+        'P': 171239,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=43; dataset_ID=x10001071; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 1117,
+        'P': 943336,
+        'mf': {'H2': 0.028, 'CO': 0.012, 'O2': 0.02, 'Ar': 0.94},
+        'comment': 'rep_id=44; dataset_ID=x10001075; target_type=Tig; Phi=1.0; log10(H2/CO)=0.36797678527391364',
+    },
+    {
+        'T': 1013,
+        'P': 2.18862e+06,
+        'mf': {'H2': 0.0733, 'CO': 0.0971, 'O2': 0.1701, 'N2': 0.6397, 'CO2': 0.0198},
+        'comment': 'rep_id=45; dataset_ID=x10001001; target_type=Tig; Phi=0.5008818342151675; log10(H2/CO)=-0.12211525526542466',
+    },
+    {
+        'T': 1019,
+        'P': 3.31333e+06,
+        'mf': {'H2': 0.0733, 'CO': 0.0971, 'O2': 0.1701, 'N2': 0.6397, 'CO2': 0.0198},
+        'comment': 'rep_id=46; dataset_ID=x10001001; target_type=Tig; Phi=0.5008818342151675; log10(H2/CO)=-0.12211525526542466',
+    },
+    {
+        'T': 2160,
+        'P': 150974,
+        'mf': {'H2': 0.0005, 'CO': 0.1217, 'O2': 0.01, 'Ar': 0.8678},
+        'comment': 'rep_id=47; dataset_ID=x10001051; target_type=Tig; Phi=6.11; log10(H2/CO)=-2.386320573029026',
+    },
+    {
+        'T': 2325,
+        'P': 167186,
+        'mf': {'H2': 0.0005, 'CO': 0.1217, 'O2': 0.01, 'Ar': 0.8678},
+        'comment': 'rep_id=48; dataset_ID=x10001051; target_type=Tig; Phi=6.11; log10(H2/CO)=-2.386320573029026',
+    },
+    {
+        'T': 2565,
+        'P': 190491,
+        'mf': {'H2': 0.0005, 'CO': 0.1217, 'O2': 0.01, 'Ar': 0.8678},
+        'comment': 'rep_id=49; dataset_ID=x10001051; target_type=Tig; Phi=6.11; log10(H2/CO)=-2.386320573029026',
+    },
+    {
+        'T': 2820,
+        'P': 215822,
+        'mf': {'H2': 0.0005, 'CO': 0.1217, 'O2': 0.01, 'Ar': 0.8678},
+        'comment': 'rep_id=50; dataset_ID=x10001051; target_type=Tig; Phi=6.11; log10(H2/CO)=-2.386320573029026',
+    },
+    {
+        'T': 947,
+        'P': 105000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=51; dataset_ID=x10001032; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1123,
+        'P': 110000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=52; dataset_ID=x10001032; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1371,
+        'P': 97000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=53; dataset_ID=x10001032; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1663,
+        'P': 100000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=54; dataset_ID=x10001032; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 2000,
+        'P': 111000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=55; dataset_ID=x10001032; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1306,
+        'P': 1.1855e+06,
+        'mf': {'H2': 0.001, 'CO': 0.009, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=56; dataset_ID=x10001072; target_type=Tig; Phi=0.4999999999999999; log10(H2/CO)=-0.9542425090532853',
+    },
+    {
+        'T': 972,
+        'P': 111458,
+        'mf': {'H2': 0.139, 'CO': 0.035, 'O2': 0.174, 'N2': 0.652},
+        'comment': 'rep_id=57; dataset_ID=x10001033; target_type=Tig; Phi=0.5000000000000001; log10(H2/CO)=0.5989467558945355',
+    },
+    {
+        'T': 1092,
+        'P': 101325,
+        'mf': {'H2': 0.139, 'CO': 0.035, 'O2': 0.174, 'N2': 0.652},
+        'comment': 'rep_id=58; dataset_ID=x10001033; target_type=Tig; Phi=0.5000000000000001; log10(H2/CO)=0.5989467558945355',
+    },
+    {
+        'T': 1159,
+        'P': 1.33749e+06,
+        'mf': {'H2': 0.017, 'CO': 0.156, 'O2': 0.175, 'N2': 0.652},
+        'comment': 'rep_id=59; dataset_ID=x10001041; target_type=Tig; Phi=0.4942857142857143; log10(H2/CO)=-0.9626756769534249',
+    },
+    {
+        'T': 945,
+        'P': 189478,
+        'mf': {'H2': 0.028, 'CO': 0.012, 'O2': 0.02, 'Ar': 0.94},
+        'comment': 'rep_id=60; dataset_ID=x10001074; target_type=Tig; Phi=1.0; log10(H2/CO)=0.36797678527391364',
+    },
+    {
+        'T': 1108,
+        'P': 185425,
+        'mf': {'H2': 0.028, 'CO': 0.012, 'O2': 0.02, 'Ar': 0.94},
+        'comment': 'rep_id=61; dataset_ID=x10001074; target_type=Tig; Phi=1.0; log10(H2/CO)=0.36797678527391364',
+    },
+    {
+        'T': 1044,
+        'P': 390000,
+        'mf': {'H2': 0.01739826, 'CO': 0.01739826, 'O2': 0.03469653, 'Ar': 0.93050695},
+        'comment': 'rep_id=62; dataset_ID=x10001025; target_type=Tig; Phi=0.5014409221902016; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 2001,
+        'P': 147934,
+        'mf': {'H2': 0.005, 'CO': 0.005, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=63; dataset_ID=x10001062; target_type=Tig; Phi=0.5; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1758,
+        'P': 153001,
+        'mf': {'H2': 0.005, 'CO': 0.005, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=64; dataset_ID=x10001062; target_type=Tig; Phi=0.5; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1376,
+        'P': 168200,
+        'mf': {'H2': 0.005, 'CO': 0.005, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=65; dataset_ID=x10001062; target_type=Tig; Phi=0.5; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1198,
+        'P': 180358,
+        'mf': {'H2': 0.005, 'CO': 0.005, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=66; dataset_ID=x10001062; target_type=Tig; Phi=0.5; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1078,
+        'P': 111458,
+        'mf': {'H2': 0.07007007, 'CO': 0.1041041, 'O2': 0.17417417, 'N2': 0.65165165},
+        'comment': 'rep_id=67; dataset_ID=x10001035; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.17193529928249512',
+    },
+    {
+        'T': 1209,
+        'P': 3.1816e+06,
+        'mf': {'H2': 0.004, 'CO': 0.006, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=68; dataset_ID=x10001067; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.17609125901949',
+    },
+    {
+        'T': 1072,
+        'P': 111458,
+        'mf': {'H2': 0.103, 'CO': 0.071, 'O2': 0.172, 'N2': 0.654},
+        'comment': 'rep_id=69; dataset_ID=x10001034; target_type=Tig; Phi=0.5058139534883721; log10(H2/CO)=0.16157887598419654',
+    },
+    {
+        'T': 1029,
+        'P': 404000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=70; dataset_ID=x10001031; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1201,
+        'P': 379000,
+        'mf': {'H2': 0.0296, 'CO': 0.0296, 'O2': 0.0296, 'Ar': 0.9112},
+        'comment': 'rep_id=71; dataset_ID=x10001031; target_type=Tig; Phi=1.0; log10(H2/CO)=0.0',
+    },
+    {
+        'T': 1640,
+        'P': 154014,
+        'mf': {'H2': 0.008, 'CO': 0.002, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=72; dataset_ID=x10001059; target_type=Tig; Phi=0.5; log10(H2/CO)=0.602059991165102',
+    },
+    {
+        'T': 1357,
+        'P': 163133,
+        'mf': {'H2': 0.008, 'CO': 0.002, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=73; dataset_ID=x10001059; target_type=Tig; Phi=0.5; log10(H2/CO)=0.602059991165102',
+    },
+    {
+        'T': 1181,
+        'P': 1.23616e+06,
+        'mf': {'H2': 0.008, 'CO': 0.002, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=74; dataset_ID=x10001060; target_type=Tig; Phi=0.5; log10(H2/CO)=0.602059991165102',
+    },
+    {
+        'T': 1317,
+        'P': 1.19564e+06,
+        'mf': {'H2': 0.002, 'CO': 0.008, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=75; dataset_ID=x10001069; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.6020599911651019',
+    },
+    {
+        'T': 1117,
+        'P': 1.30709e+06,
+        'mf': {'H2': 0.002, 'CO': 0.008, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=76; dataset_ID=x10001069; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.6020599911651019',
+    },
+    {
+        'T': 1140,
+        'P': 1.587e+06,
+        'mf': {'H2': 0.00858, 'CO': 0.00872, 'O2': 0.01725, 'Ar': 0.96545},
+        'comment': 'rep_id=77; dataset_ID=x10001058; target_type=Tig; Phi=0.5014492753623189; log10(H2/CO)=-0.007029197083049093',
+    },
+    {
+        'T': 1923,
+        'P': 138815,
+        'mf': {'H2': 0.002, 'CO': 0.008, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=78; dataset_ID=x10001068; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.6020599911651019',
+    },
+    {
+        'T': 1361,
+        'P': 164146,
+        'mf': {'H2': 0.002, 'CO': 0.008, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=79; dataset_ID=x10001068; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.6020599911651019',
+    },
+    {
+        'T': 1259,
+        'P': 3.16134e+06,
+        'mf': {'H2': 0.002, 'CO': 0.008, 'O2': 0.01, 'Ar': 0.98},
+        'comment': 'rep_id=80; dataset_ID=x10001070; target_type=Tig; Phi=0.5; log10(H2/CO)=-0.6020599911651019',
+    },
+]
+
+for c in reactor_conditions:
+    # c['comment']
+    simpleReactor(
+        temperature=(c['T'], 'K'),
+        pressure=(c['P'], 'Pa'),
+        initialMoleFractions=c['mf'],
+        terminationTime=(1.0, 's'),
+    )
+
+
+
+Warning: Edge species saving was turned on. This will slow down model generation for large simulations.
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.015559844
+CO = 0.015559844
+O2 = 0.015559844
+Ar = 0.9399906
+CO2 = 0.013329867
+
+Normalized mole fractions:
+H2 = 0.015559844015559843
+CO = 0.015559844015559843
+O2 = 0.015559844015559843
+Ar = 0.9399906009399905
+CO2 = 0.013329867013329867
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.008991009
+CO = 0.16483516
+O2 = 0.17482517
+N2 = 0.65134865
+
+Normalized mole fractions:
+H2 = 0.0089910090989011
+CO = 0.1648351618131868
+O2 = 0.1748251719230769
+N2 = 0.6513486571648353
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.008991009
+CO = 0.16483516
+O2 = 0.17482517
+N2 = 0.65134865
+
+Normalized mole fractions:
+H2 = 0.0089910090989011
+CO = 0.1648351618131868
+O2 = 0.1748251719230769
+N2 = 0.6513486571648353
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.015559844
+CO = 0.015559844
+O2 = 0.015559844
+Ar = 0.9399906
+CO2 = 0.013329867
+
+Normalized mole fractions:
+H2 = 0.015559844015559843
+CO = 0.015559844015559843
+O2 = 0.015559844015559843
+Ar = 0.9399906009399905
+CO2 = 0.013329867013329867
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.015559844
+CO = 0.015559844
+O2 = 0.015559844
+Ar = 0.9399906
+CO2 = 0.013329867
+
+Normalized mole fractions:
+H2 = 0.015559844015559843
+CO = 0.015559844015559843
+O2 = 0.015559844015559843
+Ar = 0.9399906009399905
+CO2 = 0.013329867013329867
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.0054500545
+CO = 0.015370154
+O2 = 0.010410104
+N2 = 0.028760288
+Ar = 0.9400094
+
+Normalized mole fractions:
+H2 = 0.005450054497274972
+CO = 0.015370153992314922
+O2 = 0.010410103994794948
+N2 = 0.028760287985619852
+Ar = 0.9400093995299953
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.0054500545
+CO = 0.015370154
+O2 = 0.010410104
+N2 = 0.028760288
+Ar = 0.9400094
+
+Normalized mole fractions:
+H2 = 0.005450054497274972
+CO = 0.015370153992314922
+O2 = 0.010410103994794948
+N2 = 0.028760287985619852
+Ar = 0.9400093995299953
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.008991009
+CO = 0.16483516
+O2 = 0.17482517
+N2 = 0.65134865
+
+Normalized mole fractions:
+H2 = 0.0089910090989011
+CO = 0.1648351618131868
+O2 = 0.1748251719230769
+N2 = 0.6513486571648353
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.0054500545
+CO = 0.015370154
+O2 = 0.010410104
+N2 = 0.028760288
+Ar = 0.9400094
+
+Normalized mole fractions:
+H2 = 0.005450054497274972
+CO = 0.015370153992314922
+O2 = 0.010410103994794948
+N2 = 0.028760287985619852
+Ar = 0.9400093995299953
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.0054500545
+CO = 0.015370154
+O2 = 0.010410104
+N2 = 0.028760288
+Ar = 0.9400094
+
+Normalized mole fractions:
+H2 = 0.005450054497274972
+CO = 0.015370153992314922
+O2 = 0.010410103994794948
+N2 = 0.028760287985619852
+Ar = 0.9400093995299953
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.008991009
+CO = 0.16483516
+O2 = 0.17482517
+N2 = 0.65134865
+
+Normalized mole fractions:
+H2 = 0.0089910090989011
+CO = 0.1648351618131868
+O2 = 0.1748251719230769
+N2 = 0.6513486571648353
+
+Warning: Initial mole fractions do not sum to one; normalizing.
+
+Original composition:
+H2 = 0.07007007
+CO = 0.1041041
+O2 = 0.17417417
+N2 = 0.65165165
+
+Normalized mole fractions:
+H2 = 0.0700700707007007
+CO = 0.10410410104104101
+O2 = 0.17417417174174168
+N2 = 0.6516516565165166
+
+
+Loading transport group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/transport/groups...
+Loading frequencies group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/statmech/groups...
+Loading solvation thermodynamics group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/solvation/groups...
+Loading thermodynamics library from primaryThermoLibrary.py in /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/thermo/libraries...
+Loading thermodynamics group database from /home/krunal/miniforge3/envs/rmg/share/rmgdatabase/thermo/groups...
+Adding rate rules from training set in kinetics families...
+Warning: Cphigh is above the theoretical CpInf value for ThermoData object
+ThermoData(Tdata=([300,400,500,600,800,1000,1500],'K'), Cpdata=([60.2599,68.0494,74.7775,80.9311,90.8846,97.4337,105.393],'J/(mol*K)'), H298=(-477.191,'kJ/mol'), S298=(269.551,'J/(mol*K)'), Cp0=(33.2579,'J/(mol*K)'), CpInf=(103.931,'J/(mol*K)'), comment="""Thermo group additivity estimation: group(O2s-(Cds-Cd)(Cds-Cd)) + group(O2s-(Cds-O2d)H) + group(Cds-OdOsOs) + group(Li-OCOdO) + radical(OC=OOJ)""").
+The thermo for this species is probably wrong! Setting CpInf = Cphigh for Entropy calculationat T = 2000.0 K...
+Warning: Cphigh is above the theoretical CpInf value for ThermoData object
+ThermoData(Tdata=([300,400,500,600,800,1000,1500],'K'), Cpdata=([60.2599,68.0494,74.7775,80.9311,90.8846,97.4337,105.393],'J/(mol*K)'), H298=(-477.191,'kJ/mol'), S298=(269.551,'J/(mol*K)'), Cp0=(33.2579,'J/(mol*K)'), CpInf=(103.931,'J/(mol*K)'), comment="""Thermo group additivity estimation: group(O2s-(Cds-Cd)(Cds-Cd)) + group(O2s-(Cds-O2d)H) + group(Cds-OdOsOs) + group(Li-OCOdO) + radical(OC=OOJ)""").
+The thermo for this species is probably wrong! Setting CpInf = Cphigh for Entropy calculationat T = 1666.6666666666665 K...
+Filling in rate rules in kinetics families by averaging...
+NOT generating reactions for unreactive species Ar
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ar
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 1 species and 0 reactions
+    The model edge has 5 species and 0 reactions
+
+
+NOT generating reactions for unreactive species CO2
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CO2
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 2 species and 0 reactions
+    The model edge has 4 species and 0 reactions
+
+
+NOT generating reactions for unreactive species N2
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    N2
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 3 species and 0 reactions
+    The model edge has 3 species and 0 reactions
+
+
+NOT generating reactions for unreactive species He
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    He
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 4 species and 0 reactions
+    The model edge has 3 species and 0 reactions
+
+
+NOT generating reactions for unreactive species Ne
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ne
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 5 species and 0 reactions
+    The model edge has 3 species and 0 reactions
+
+
+Adding species CO(1) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CO(1)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 6 species and 0 reactions
+    The model edge has 2 species and 0 reactions
+
+
+Adding species H2(2) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    H2(2)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 7 species and 0 reactions
+    The model edge has 1 species and 0 reactions
+
+
+Adding species O2(3) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O2(3)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 0 reactions
+    The model edge has 0 species and 0 reactions
+
+
+Initialization complete. Starting model generation.
+
+Generating initial reactions...
+For reaction generation 1 process is used.
+Generating thermo for new species...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 4 new edge species
+    [H](4)
+    C=O(5)
+    [CH]=O(6)
+    [O]O(7)
+Added 0 new core reactions
+Created 4 new edge reactions
+    [H](4) + [H](4) <=> H2(2)
+    H2(2) + CO(1) <=> C=O(5)
+    [H](4) + [CH]=O(6) <=> H2(2) + CO(1)
+    O2(3) + H2(2) <=> [H](4) + [O]O(7)
+
+After model enlargement:
+    The model core has 8 species and 0 reactions
+    The model edge has 4 species and 4 reactions
+
+
+Completed initial enlarge edge step.
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Saving annotated version of Chemkin file...
+Chemkin file contains 0 reactions.
