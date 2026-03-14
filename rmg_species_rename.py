@@ -1,73 +1,20 @@
 #!/usr/bin/env python3
-"""
-Rename RMG-generated Cantera YAML species to more human-readable names using the RMG species dictionary.
-
-Inputs
-------
-1) species dictionary text file (RMG style), e.g. chemkin/species_dictionary.txt
-2) cantera YAML file, e.g. cantera/chem.yaml or cantera/chem_annotated.yaml
-
-Outputs
--------
-1) New Cantera YAML with renamed species (all occurrences updated consistently)
-2) species.csv cross-reference:
-   - new_name
-   - old_with_number
-   - old_without_number
-   - species_number
-   - formula
-   - multiplicity
-   - net_charge
-
-How "human-readable" names are made
------------------------------------
-- We compute the molecular formula from the adjacency list (Hill order).
-- Base new name = formula (e.g., HO2, CHO2, C2H2O4, etc.)
-- If multiple species share the same formula, we disambiguate using multiplicity and/or the RMG index:
-    formula_m{mult} or formula_m{mult}_{id}
-
-This ensures names are:
-- readable,
-- deterministic,
-- unique (required by Cantera).
-
-Usage
------
-python rename_rmg_cantera_species.py \
-    --species-dict chemkin/species_dictionary.txt \
-    --yaml cantera/chem.yaml \
-    --out-yaml cantera/chem_readable.yaml \
-    --out-csv cantera/species.csv
-"""
-
 from __future__ import annotations
 
 import argparse
 import csv
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
-
-@dataclass
-class SpeciesEntry:
-    old_with_number: str
-    old_without_number: str
-    species_number: int | None
-    formula: str
-    multiplicity: int
-    net_charge: int
-    new_name: str = ""
-
+from ruamel.yaml import YAML
+from rmgpy.species import Species as RMGSpecies
 
 LABEL_NUM_RE = re.compile(r"^(.*)\((\d+)\)$")
 
 
 def split_blocks(text: str) -> List[str]:
-    # Species dictionary blocks are separated by blank lines
-    blocks = []
-    cur: List[str] = []
+    blocks, cur = [], []
     for line in text.splitlines():
         if line.strip() == "":
             if cur:
@@ -80,8 +27,7 @@ def split_blocks(text: str) -> List[str]:
     return blocks
 
 
-def parse_label(label: str) -> Tuple[str, str, int | None]:
-    """Return (old_with_number, old_without_number, species_number)."""
+def parse_label(label: str) -> Tuple[str, str, Optional[int]]:
     label = label.strip()
     m = LABEL_NUM_RE.match(label)
     if m:
@@ -91,89 +37,117 @@ def parse_label(label: str) -> Tuple[str, str, int | None]:
     return label, label, None
 
 
-def parse_multiplicity_and_atoms(block_lines: List[str]) -> Tuple[int, Dict[str, int], int]:
+def sanitize_species_name(name: str) -> str:
+    # keep it Cantera-friendly (no spaces)
+    return name.replace(" ", "")
+
+
+def rmg_from_adjacency(adj: str) -> Tuple[str, str, int, int]:
     """
-    Parse multiplicity, element counts, and net charge from the adjacency list.
-    Lines look like:
-        multiplicity 3
-        1 O u1 p2 c0 {2,S}
+    Return (smiles, formula, multiplicity, net_charge) from an RMG adjacency list.
     """
-    multiplicity = 1
-    counts: Dict[str, int] = {}
+    sp = RMGSpecies()
+    sp.from_adjacency_list(adj)
+
+    mol = sp.molecule[0]
+    smiles = mol.to_smiles()
+    try:
+        formula = sp.get_formula()
+    except Exception:
+        formula = mol.get_formula()
+
+    multiplicity = getattr(mol, "multiplicity", 1) or 1
+
     net_charge = 0
+    for a in mol.atoms:
+        net_charge += int(getattr(a, "charge", 0))
 
-    for ln in block_lines[1:]:
-        s = ln.strip()
-        if not s:
-            continue
-        if s.lower().startswith("multiplicity"):
-            parts = s.split()
-            if len(parts) >= 2:
-                try:
-                    multiplicity = int(parts[1])
-                except ValueError:
-                    pass
-            continue
-
-        # Atom line: starts with an integer index
-        parts = s.split()
-        if not parts:
-            continue
-        if not parts[0].isdigit():
-            continue
-
-        # element is the second token (e.g., O, C, H, Ar, He)
-        if len(parts) < 2:
-            continue
-        elem = parts[1]
-        counts[elem] = counts.get(elem, 0) + 1
-
-        # find a token like c0, c+1, c-1
-        for tok in parts:
-            if tok.startswith("c") and len(tok) >= 2:
-                # tok can be c0, c+1, c-1
-                try:
-                    net_charge += int(tok[1:])
-                except ValueError:
-                    pass
-                break
-
-    return multiplicity, counts, net_charge
+    return smiles, str(formula), int(multiplicity), int(net_charge)
 
 
-def hill_formula(counts: Dict[str, int]) -> str:
+def ffcm_name_from_formula(formula: str, multiplicity: int, net_charge: int) -> Optional[str]:
     """
-    Hill system: C, H, then alphabetical (Ar, He, N, O, ...).
+    Minimal mapping to match your FFCM-style list (and a few common extras).
+    Extend this mapping if you want.
     """
-    def fmt(elem: str, n: int) -> str:
-        return f"{elem}{n}" if n != 1 else elem
+    f = formula.replace(" ", "")
 
-    c = counts.get("C", 0)
-    h = counts.get("H", 0)
+    # inerts
+    if f == "Ar":
+        return "AR"
+    if f == "He":
+        return "HE"
+    if f == "N2":
+        return "N2"
 
-    out = ""
-    used = set()
+    # H/O core
+    if f == "H2":
+        return "H2"
+    if f == "H" and multiplicity == 2:
+        return "H"
+    if f == "O" and multiplicity == 3:
+        return "O"
+    if f == "O2" and multiplicity == 3:
+        return "O2"
+    if f in ("HO", "OH") and multiplicity == 2:
+        return "OH"
+    if f == "H2O":
+        return "H2O"
+    if f == "HO2" and multiplicity == 2:
+        return "HO2"
+    if f == "H2O2":
+        return "H2O2"
 
-    if c > 0:
-        out += fmt("C", c)
-        used.add("C")
-    if h > 0:
-        out += fmt("H", h)
-        used.add("H")
+    # syngas
+    if f == "CO" and net_charge == 0:
+        return "CO"
+    if f == "CO2":
+        return "CO2"
 
-    # remaining elements in alphabetical order
-    for elem in sorted(k for k in counts.keys() if k not in used):
-        out += fmt(elem, counts[elem])
+    # (optional) small hydrocarbon radicals if they appear
+    if f in ("CH", "CH2", "CH3", "CH4", "HCO", "CH2O"):
+        return f
 
-    # If somehow empty (shouldn't happen), fallback
-    return out or "X"
+    return None
 
 
-def build_entries(species_dict_path: Path) -> List[SpeciesEntry]:
+def uniqueify(name: str, used: set[str], suffix: str) -> str:
+    """
+    Ensure unique species names (required by Cantera).
+    """
+    base = sanitize_species_name(name)
+    if base not in used:
+        used.add(base)
+        return base
+
+    cand = f"{base}_{suffix}"
+    if cand not in used:
+        used.add(cand)
+        return cand
+
+    k = 2
+    while True:
+        cand2 = f"{base}_{suffix}_{k}"
+        if cand2 not in used:
+            used.add(cand2)
+            return cand2
+        k += 1
+
+
+def build_mapping_from_species_dict(species_dict_path: Path, others_mode: str) -> Tuple[Dict[str, str], List[Dict[str, str]]]:
+    """
+    Build mapping old_name -> new_name, and rows for species.csv.
+    others_mode:
+      - 'smiles' : rename non-FFCM species to SMILES
+      - 'keep'   : keep original label for non-FFCM species
+    """
     text = species_dict_path.read_text(encoding="utf-8", errors="replace")
     blocks = split_blocks(text)
 
-    entries: List[SpeciesEntry] = []
+    used: set[str] = set()
+    mapping: Dict[str, str] = {}
+    rows: List[Dict[str, str]] = []
+
     for blk in blocks:
         lines = blk.splitlines()
         if not lines:
@@ -181,163 +155,137 @@ def build_entries(species_dict_path: Path) -> List[SpeciesEntry]:
 
         label = lines[0].strip()
         old_with, old_wo, idx = parse_label(label)
+        adjacency = "\n".join(lines[1:]).strip() + "\n"
 
-        mult, counts, q = parse_multiplicity_and_atoms(lines)
-        formula = hill_formula(counts)
+        smiles_wo, formula, mult, q = rmg_from_adjacency(adjacency)
 
-        entries.append(
-            SpeciesEntry(
-                old_with_number=old_with,
-                old_without_number=old_wo,
-                species_number=idx,
-                formula=formula,
-                multiplicity=mult,
-                net_charge=q,
-            )
-        )
-    return entries
-
-
-def assign_unique_new_names(entries: List[SpeciesEntry]) -> None:
-    """
-    Base name = formula.
-    If duplicates exist, disambiguate by multiplicity and/or species number.
-    """
-    # group by formula
-    by_formula: Dict[str, List[SpeciesEntry]] = {}
-    for e in entries:
-        by_formula.setdefault(e.formula, []).append(e)
-
-    used_names: set[str] = set()
-
-    for formula, group in by_formula.items():
-        if len(group) == 1:
-            name = formula
-            # ensure uniqueness globally
-            if name in used_names:
-                # extremely rare: fallback
-                suffix = group[0].species_number if group[0].species_number is not None else id(group[0])
-                name = f"{formula}_{suffix}"
-            group[0].new_name = name
-            used_names.add(name)
-            continue
-
-        # For duplicates: try formula_m{mult} first
-        # then add _{id} if still duplicates.
-        temp_names: Dict[str, int] = {}
-        for e in group:
-            base = f"{formula}_m{e.multiplicity}"
-            temp_names[base] = temp_names.get(base, 0) + 1
-
-        for e in group:
-            base = f"{formula}_m{e.multiplicity}"
-            if temp_names[base] == 1 and base not in used_names:
-                e.new_name = base
+        # Decide new name
+        ffcm = ffcm_name_from_formula(formula, mult, q)
+        if ffcm is not None:
+            new_name = uniqueify(ffcm, used, suffix=str(idx) if idx is not None else "x")
+        else:
+            if others_mode == "smiles":
+                new_name = uniqueify(smiles_wo, used, suffix=str(idx) if idx is not None else "x")
             else:
-                # add species number for guaranteed uniqueness
-                sid = e.species_number if e.species_number is not None else "x"
-                cand = f"{base}_{sid}"
-                # final fallback if somehow still collides
-                k = 2
-                final = cand
-                while final in used_names:
-                    final = f"{cand}_{k}"
-                    k += 1
-                e.new_name = final
-            used_names.add(e.new_name)
+                new_name = uniqueify(old_wo, used, suffix=str(idx) if idx is not None else "x")
+
+        # IMPORTANT:
+        # Only map the *exact species labels* (with number) that appear in Cantera YAML/CK,
+        # to avoid touching element symbols (O, H, C) in thermo composition keys.
+        mapping[old_with] = new_name
+
+        # (Optional) map old_without_number ONLY if it cannot collide with element keys
+        # Keep this conservative.
+        if old_wo not in {"H", "O", "C", "N", "Ar", "He", "Ne"}:
+            mapping.setdefault(old_wo, new_name)
+
+        smiles_with = f"{smiles_wo}({idx})" if idx is not None else smiles_wo
+
+        rows.append({
+            "new_name": new_name,
+            "rmg_label_with_number": old_with,
+            "rmg_label_without_number": old_wo,
+            "species_number": "" if idx is None else str(idx),
+            "smiles_with_number": smiles_with,
+            "smiles_without_number": smiles_wo,
+            "formula": formula,
+            "multiplicity": str(mult),
+            "net_charge": str(q),
+        })
+
+    return mapping, rows
 
 
-def build_mapping(entries: List[SpeciesEntry]) -> Dict[str, str]:
-    """
-    Map *exact* old labels in YAML to new names.
-    We map the 'old_with_number' form, because that is what RMG typically writes to YAML.
-    Also map old_without_number if it differs (helps some cases).
-    """
-    m: Dict[str, str] = {}
-    for e in entries:
-        m[e.old_with_number] = e.new_name
-        if e.old_without_number != e.old_with_number:
-            # only add if not already mapped
-            m.setdefault(e.old_without_number, e.new_name)
-    return m
-
-
-def safe_token_replace(text: str, mapping: Dict[str, str]) -> str:
-    """
-    Replace species names using regex token boundaries to avoid partial replacements,
-    e.g. avoid changing CO2 when replacing CO.
-
-    Boundary rule:
-      old must not be preceded by [A-Za-z0-9_]
-      old must not be followed by   [A-Za-z0-9_]
-    This works well for Cantera YAML, where species are separated by spaces, commas, +, <=>, :, quotes, brackets, etc.
-    """
-    # Replace longer names first
+def replace_in_equation(equation: str, mapping: Dict[str, str]) -> str:
+    # Replace only in reaction equations (safe)
     items = sorted(mapping.items(), key=lambda kv: len(kv[0]), reverse=True)
-
-    out = text
+    out = equation
     for old, new in items:
-        pattern = r"(?<![A-Za-z0-9_])" + re.escape(old) + r"(?![A-Za-z0-9_])"
-        out = re.sub(pattern, new, out)
+        pat = r"(?<![A-Za-z0-9_])" + re.escape(old) + r"(?![A-Za-z0-9_])"
+        out = re.sub(pat, new, out)
     return out
 
 
-def write_species_csv(entries: List[SpeciesEntry], out_csv: Path) -> None:
-    out_csv.parent.mkdir(parents=True, exist_ok=True)
-    with out_csv.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow([
-            "new_name",
-            "old_with_number",
-            "old_without_number",
-            "species_number",
-            "formula",
-            "multiplicity",
-            "net_charge",
-        ])
-        for e in sorted(entries, key=lambda x: (x.formula, x.species_number or -1, x.old_with_number)):
-            w.writerow([
-                e.new_name,
-                e.old_with_number,
-                e.old_without_number,
-                "" if e.species_number is None else e.species_number,
-                e.formula,
-                e.multiplicity,
-                e.net_charge,
-            ])
+def rename_yaml_cantera(in_yaml: Path, out_yaml: Path, mapping: Dict[str, str]) -> None:
+    """
+    YAML-aware rename:
+    - species[*]['name']
+    - phases[*]['species'] list
+    - reactions[*]['equation']
+    - reactions[*]['efficiencies'] keys (if present)
+    Does NOT touch thermo composition keys or any numeric data.
+    """
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    data = yaml.load(in_yaml.read_text(encoding="utf-8", errors="replace"))
 
+    # Species blocks
+    if "species" in data:
+        for sp in data["species"]:
+            old = sp.get("name")
+            if old in mapping:
+                sp["name"] = mapping[old]
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--species-dict", required=True, help="Path to RMG species_dictionary.txt")
-    ap.add_argument("--yaml", required=True, help="Path to Cantera YAML (chem.yaml or chem_annotated.yaml)")
-    ap.add_argument("--out-yaml", required=True, help="Output Cantera YAML path with renamed species")
-    ap.add_argument("--out-csv", required=True, help="Output species.csv cross-reference path")
-    args = ap.parse_args()
+    # Phase species lists
+    if "phases" in data:
+        for ph in data["phases"]:
+            if "species" in ph and isinstance(ph["species"], list):
+                ph["species"] = [mapping.get(s, s) for s in ph["species"]]
 
-    species_dict_path = Path(args.species_dict)
-    yaml_path = Path(args.yaml)
-    out_yaml = Path(args.out_yaml)
-    out_csv = Path(args.out_csv)
+    # Reactions
+    if "reactions" in data:
+        for rxn in data["reactions"]:
+            if "equation" in rxn:
+                rxn["equation"] = replace_in_equation(str(rxn["equation"]), mapping)
 
-    entries = build_entries(species_dict_path)
-    if not entries:
-        raise RuntimeError(f"No species parsed from {species_dict_path}")
-
-    assign_unique_new_names(entries)
-    mapping = build_mapping(entries)
-
-    yaml_text = yaml_path.read_text(encoding="utf-8", errors="replace")
-    new_yaml_text = safe_token_replace(yaml_text, mapping)
+            # third-body efficiencies keys are species names
+            if "efficiencies" in rxn and isinstance(rxn["efficiencies"], dict):
+                new_eff = {}
+                for k, v in rxn["efficiencies"].items():
+                    new_eff[mapping.get(k, k)] = v
+                rxn["efficiencies"] = new_eff
 
     out_yaml.parent.mkdir(parents=True, exist_ok=True)
-    out_yaml.write_text(new_yaml_text, encoding="utf-8")
+    with out_yaml.open("w", encoding="utf-8") as f:
+        yaml.dump(data, f)
 
-    write_species_csv(entries, out_csv)
 
-    print(f"[OK] Wrote renamed Cantera YAML: {out_yaml}")
-    print(f"[OK] Wrote cross-reference CSV: {out_csv}")
-    print(f"[INFO] Species renamed: {len(entries)}")
+def write_species_csv(rows: List[Dict[str, str]], out_csv: Path) -> None:
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    cols = [
+        "new_name",
+        "rmg_label_with_number",
+        "rmg_label_without_number",
+        "species_number",
+        "smiles_with_number",
+        "smiles_without_number",
+        "formula",
+        "multiplicity",
+        "net_charge",
+    ]
+    with out_csv.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        w.writerows(rows)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--species-dict", required=True, help="chemkin/species_dictionary.txt")
+    ap.add_argument("--yaml", required=True, help="cantera/chem.yaml or chem_annotated.yaml")
+    ap.add_argument("--out-yaml", required=True, help="output YAML path")
+    ap.add_argument("--out-csv", required=True, help="species.csv path")
+    ap.add_argument("--others", choices=["smiles", "keep"], default="smiles",
+                    help="how to name non-FFCM species (default: smiles)")
+    args = ap.parse_args()
+
+    mapping, rows = build_mapping_from_species_dict(Path(args.species_dict), others_mode=args.others)
+    rename_yaml_cantera(Path(args.yaml), Path(args.out_yaml), mapping)
+    write_species_csv(rows, Path(args.out_csv))
+
+    print(f"[OK] wrote YAML: {args.out_yaml}")
+    print(f"[OK] wrote CSV:  {args.out_csv}")
+    print(f"[INFO] mapped {len(rows)} species")
 
 
 if __name__ == "__main__":
